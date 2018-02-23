@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sass_processor',
     'webpack_loader',
     'ml.apps.MLConfig',
 ]
