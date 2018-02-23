@@ -3,3 +3,4 @@ node_modules/*
 MLGame.sock
 MLGameEnv/*
 *.pyc
+static/webpack/bundles/*
