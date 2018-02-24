@@ -1,8 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import p5 from 'p5';
+import 'p5/lib/addons/p5.sound';
+import 'p5/lib/addons/p5.dom';
 import 'pretty-checkbox/dist/pretty-checkbox.min.css';
-import P5Wrapper from './P5Wrapper';
+import { setSmooth } from '../actions';
+import { MUSIC_LIST } from '../consts';
 
 class BlockAnimation extends React.Component {
   constructor(props) {
@@ -10,25 +14,28 @@ class BlockAnimation extends React.Component {
     this.sketch = this.sketch.bind(this);
   }
 
+  componentDidMount() {
+    if (this.p5Obj == null) this.p5Obj = new p5(this.sketch); // eslint-disable-line new-cap
+  }
+
+  componentWillUnmount() {
+    if (this.p5Obj) {
+      this.p5Obj.remove();
+      this.p5Obj = null;
+    }
+  }
+
   sketch(p) {
-    const { numBlock } = this.props,
+    const { numBlock, song, storeSmooth } = this.props,
       marginRight = 210 + 20,
       marginTop = 70,
-      musicList = ['Aperture', 'Arrow', 'Cloud-9', 'Firefly', 'Frag-Out',
-        'Good-Times', 'Hope', 'Lights', 'Lush', 'Me-You', 'Oblivion', 'Paradise',
-        'Run-Away', 'Sound-of-Goodbye', 'The-Long-Road-Home', 'Vitality'],
       previousH = {};
-    let { smooth, startSong: songC } = this.props,
+    let { smooth } = this.props,
       angle = 0,
       sliderDragged = false,
       sliderReleased = true,
-      x, z, ma, w, maxD, length, d, offset, a, h, pH, song, amplitude,
-      canvas, playButton, smoothCB, slider, selection, title;
-
-    p.preload = () => {
-      songC -= 1;
-      p.loadSong();
-    };
+      canvas, x, z, ma, w, maxD, length, d, offset, a, h, pH,
+      playButton, smoothCB, slider, selection, title;
 
     p.setWindow = () => {
       length = p.floor(p.min(p.width, p.height));
@@ -40,43 +47,8 @@ class BlockAnimation extends React.Component {
       selection.position(p.width - marginRight, marginTop + 80);
       title.position(
         (p.width - title.elt.clientWidth) / 2,
-        (p.height - title.elt.clientHeight) / 2,
+        (p.height - title.elt.clientHeight - 200) / 2,
       );
-    };
-
-    p.loadSong = (callback, songName) => {
-      if (song) song.disconnect();
-      if (slider) slider.attribute('disabled', '');
-      if (playButton) playButton.attribute('disabled', '');
-      if (selection) selection.attribute('disabled', '');
-
-      if (songName) {
-        songC = musicList.indexOf(songName);
-        song = p.loadSound(`/static/ml/music/${songName}.mp3`, callback);
-      } else {
-        songC += 1;
-        if (songC >= musicList.length) songC -= musicList.length;
-        song = p.loadSound(`/static/ml/music/${musicList[songC]}.mp3`, callback);
-      }
-    };
-
-    p.songEnded = () => {
-      if (p.abs(song.currentTime() - song.duration()) < 0.1 || song.currentTime() === 0) {
-        p.switchSong();
-      }
-    };
-
-    p.switchSong = (songName) => {
-      console.log('Switching for new song');
-      p.loadSong(() => {
-        song.onended(p.songEnded);
-        song.play();
-        slider.attribute('max', song.duration());
-        slider.removeAttribute('disabled');
-        playButton.removeAttribute('disabled');
-        selection.removeAttribute('disabled');
-        selection.selected(musicList[songC]);
-      }, songName);
     };
 
     p.setup = () => {
@@ -86,20 +58,20 @@ class BlockAnimation extends React.Component {
       playButton.class('playButton');
       playButton.addClass('paused');
       playButton.mouseClicked(() => {
-        if (song.isPlaying()) song.pause();
-        else song.play();
+        if (song.paused) song.play();
+        else song.pause();
       });
 
       smoothCB = p.createCheckbox();
       smoothCB.class('smoothCB pretty p-default');
       smoothCB.html("<div class='state'><label>Smooth</label></div>", true);
       smoothCB.checked(smooth);
-      smoothCB.mouseClicked(() => { smooth = smoothCB.checked(); });
+      smoothCB.mouseClicked(() => { smooth = smoothCB.checked(); storeSmooth(smooth); });
 
-      slider = p.createSlider(0, song.duration());
+      slider = p.createSlider(0, song.duration);
       slider.class('slider');
       slider.changed(() => {
-        song.jump(slider.value());
+        song.currentTime = slider.value();
         sliderReleased = true;
       });
       slider.mousePressed(() => {
@@ -109,22 +81,20 @@ class BlockAnimation extends React.Component {
 
       selection = p.createSelect();
       selection.class('form-control form-control-sm selectBox');
-      musicList.forEach((music) => {
+      MUSIC_LIST.forEach((music) => {
         selection.option(music);
       });
-      selection.changed(() => p.switchSong(selection.selected()));
-
+      selection.changed(() => {
+        const selected = selection.selected();
+        song.songC = MUSIC_LIST.indexOf(selected);
+        song.src = `/static/ml/music/${selected}.mp3`;
+      });
 
       title = p.createP(`Machine Learning &</br>Game Development
         </br>Prepare to be Amazed!`).center();
       title.class('display-3 title');
 
-
       ma = p.atan(1 / p.sqrt(2));
-      amplitude = new p5.Amplitude();
-      song.onended(p.songEnded);
-      song.play();
-
       p.setWindow();
     };
 
@@ -135,7 +105,7 @@ class BlockAnimation extends React.Component {
       p.rotateY(-p.QUARTER_PI);
       p.normalMaterial();
 
-      const isPlaying = song.isPlaying();
+      const isPlaying = !song.paused;
       for (z = -length / 2; z < length / 2; z += w) {
         for (x = -length / 2; x < length / 2; x += w) {
           p.push();
@@ -145,7 +115,7 @@ class BlockAnimation extends React.Component {
           if (isPlaying) {
             h = p.floor(p.map(
               p.sin(2 * a), -1, 1, length * 0.1,
-              p.map(amplitude.getLevel(), 0, 1, length * 0.1, length * 0.8),
+              p.map((song.amp || 0), 0, 1, length * 0.1, length * 0.8),
             ));
           } else h = p.floor(p.map(p.sin(2 * a), -1, 1, length * 0.1, length * 0.5));
           if (smooth) {
@@ -169,10 +139,13 @@ class BlockAnimation extends React.Component {
       if (isPlaying) {
         angle -= 0.07;
         playButton.class('playButton paused');
-        if (song.currentTime() !== 0) {
-          if (!sliderDragged) slider.value(song.currentTime());
-          if (sliderReleased) sliderDragged = false;
+        selection.selected(MUSIC_LIST[song.songC]);
+
+        if (!sliderDragged) {
+          slider.attribute('max', song.duration);
+          slider.value(song.currentTime);
         }
+        if (sliderReleased) sliderDragged = false;
       } else {
         angle -= 0.02;
         playButton.class('playButton');
@@ -186,25 +159,28 @@ class BlockAnimation extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <P5Wrapper sketch={this.sketch} />
-      </div>
-    );
+    return <div />;
   }
 }
 
 BlockAnimation.propTypes = {
   numBlock: PropTypes.number,
-  smooth: PropTypes.bool,
-  startSong: PropTypes.number,
+  smooth: PropTypes.bool.isRequired,
+  song: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  storeSmooth: PropTypes.func.isRequired,
 };
-
 
 BlockAnimation.defaultProps = {
   numBlock: 14,
-  smooth: true,
-  startSong: 0,
 };
 
-export default BlockAnimation;
+const mapStateToProps = state => ({
+    song: state.blockAnimation.song,
+    smooth: state.blockAnimation.smooth,
+  }),
+  mapDispatchToProps = dispatch => ({
+    storeSmooth: smooth => dispatch(setSmooth(smooth)),
+  }),
+  BlockSongAnimation = connect(mapStateToProps, mapDispatchToProps)(BlockAnimation);
+
+export default BlockSongAnimation;
