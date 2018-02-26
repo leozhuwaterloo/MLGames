@@ -4,7 +4,7 @@ import 'normalize.css';
 import { BrowserRouter, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import MyNavbar from './MyNavbar';
-import BlockSongAnimation from './BlockSongAnimation';
+import BlockAnimation from './BlockAnimation';
 import FishIdentifier from './FishIdentifier';
 import { setSong, setSongName, setSongPlaying } from '../actions';
 import { MUSIC_LIST, ROOT_URL, FISH_IDENTIFICATION_URL } from '../consts';
@@ -55,7 +55,7 @@ class AppRounter extends React.Component {
       <BrowserRouter>
         <div>
           <MyNavbar />
-          <Route exact path={ROOT_URL} component={BlockSongAnimation} />
+          <Route exact path={ROOT_URL} component={BlockAnimation} />
           <Route path={FISH_IDENTIFICATION_URL} component={FishIdentifier} />
         </div>
       </BrowserRouter>

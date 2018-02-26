@@ -8,7 +8,7 @@ import 'pretty-checkbox/dist/pretty-checkbox.min.css';
 import { setSmooth, setSongName, setSongPlaying } from '../actions';
 import { MUSIC_LIST } from '../consts';
 
-class BlockAnimation extends React.Component {
+class BlockAnimationDumb extends React.Component {
   constructor(props) {
     super(props);
     this.sketch = this.sketch.bind(this);
@@ -167,7 +167,7 @@ class BlockAnimation extends React.Component {
   }
 }
 
-BlockAnimation.propTypes = {
+BlockAnimationDumb.propTypes = {
   numBlock: PropTypes.number,
   smooth: PropTypes.bool.isRequired,
   song: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
@@ -176,7 +176,7 @@ BlockAnimation.propTypes = {
   storeSongPlaying: PropTypes.func.isRequired,
 };
 
-BlockAnimation.defaultProps = {
+BlockAnimationDumb.defaultProps = {
   numBlock: 14,
 };
 
@@ -189,6 +189,6 @@ const mapStateToProps = state => ({
     storeSongName: songName => dispatch(setSongName(songName)),
     storeSongPlaying: songPlaying => dispatch(setSongPlaying(songPlaying)),
   }),
-  BlockSongAnimation = connect(mapStateToProps, mapDispatchToProps)(BlockAnimation);
+  BlockAnimation = connect(mapStateToProps, mapDispatchToProps)(BlockAnimationDumb);
 
-export default BlockSongAnimation;
+export default BlockAnimation;

@@ -34,18 +34,40 @@
   & .content-main {
     height: 80%;
     & .img-container{
-      height: 80%;
+      height: 70%;
+      padding-top: 10px;
     }
 
-    & #predict {
+    & .predict-button {
       width: 100px;
       height: 50px;
+    }
+    & .try-button {
+      width: 220px;
+      height: 50px;
+
+      & input {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+    }
+    & .alert {
+      margin: 0px 5px;
+      & .progress {
+        width: 220px;
+      }
+
+      & .progress-num {
+        margin-left: 10px;
+        color: theme-color('primary');
+      }
     }
 
     & .carousel-item {
       & .center-display{
-        width: 80vw;
-        height: 50vh;
+        width: 70vw;
+        height: 40vh;
         background: theme-color('dark');
 
         & img {
