@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='index', permanent=False)),
     path('ml', include('ml.urls')),
+    path('tool/ml', include('ml.toolurls')),
 ]

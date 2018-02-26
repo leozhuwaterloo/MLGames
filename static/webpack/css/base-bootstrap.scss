@@ -1,0 +1,35 @@
+@import "node_modules/bootstrap/scss/bootstrap";
+
+$theme-colors: (
+  primary: $blue,
+  secondary: $gray-600,
+  success: $green,
+  info: $cyan,
+  warning: $yellow,
+  danger: $red,
+  light: $gray-100,
+  dark: $gray-800,
+  "cyan": #82f6d8,
+  "green": #7cf07f,
+  "red": #f9879b,
+);
+
+@function color($key: "blue") {
+  @return map-get($colors, $key);
+}
+
+@function theme-color($key: "primary") {
+  @return map-get($theme-colors, $key);
+}
+
+@function theme-color-level($key: "primary", $level: 0) {
+  $color: map-get($theme-colors, $key);
+  $color-base: if($level > 0, #000, #fff);
+  $level: abs($level);
+
+  @return mix($color-base, $color, $level * $theme-color-interval);
+}
+
+@function gray($key: "100") {
+  @return map-get($grays, $key);
+}

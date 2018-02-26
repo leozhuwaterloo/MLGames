@@ -6,15 +6,15 @@ import { connect } from 'react-redux';
 import MyNavbar from './MyNavbar';
 import BlockSongAnimation from './BlockSongAnimation';
 import FishIdentifier from './FishIdentifier';
-import '../../css/style.scss';
-import { setSong } from '../actions';
+import { setSong, setSongName, setSongPlaying } from '../actions';
 import { MUSIC_LIST, ROOT_URL, FISH_IDENTIFICATION_URL } from '../consts';
+import '../../css/style.scss';
 
 class AppRounter extends React.Component {
   componentWillMount() {
-    const { storeSong } = this.props,
+    const { storeSong, storeSongName, storeSongPlaying } = this.props,
       ctx = new AudioContext(),
-      processor = ctx.createScriptProcessor(256, 1, 1),
+      processor = ctx.createScriptProcessor(2048, 1, 1),
       audio = new Audio(`/static/ml/music/${MUSIC_LIST[0]}.mp3`),
       source = ctx.createMediaElementSource(audio);
 
@@ -38,12 +38,15 @@ class AppRounter extends React.Component {
       audio.songC += 1;
       if (audio.songC >= MUSIC_LIST.length) audio.songC -= MUSIC_LIST.length;
       audio.src = `/static/ml/music/${MUSIC_LIST[audio.songC]}.mp3`;
+      storeSongName(MUSIC_LIST[audio.songC]);
     };
 
     audio.oncanplay = () => {
       audio.play();
+      storeSongPlaying(true);
     };
 
+    storeSongName(MUSIC_LIST[0]);
     storeSong(audio);
   }
 
@@ -63,10 +66,14 @@ class AppRounter extends React.Component {
 
 AppRounter.propTypes = {
   storeSong: PropTypes.func.isRequired,
+  storeSongName: PropTypes.func.isRequired,
+  storeSongPlaying: PropTypes.func.isRequired,
 };
 
 const mapDispatchToProps = dispatch => ({
     storeSong: song => dispatch(setSong(song)),
+    storeSongName: songName => dispatch(setSongName(songName)),
+    storeSongPlaying: songPlaying => dispatch(setSongPlaying(songPlaying)),
   }),
   App = connect(null, mapDispatchToProps)(AppRounter);
 

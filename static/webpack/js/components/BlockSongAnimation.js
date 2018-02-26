@@ -5,7 +5,7 @@ import p5 from 'p5';
 import 'p5/lib/addons/p5.sound';
 import 'p5/lib/addons/p5.dom';
 import 'pretty-checkbox/dist/pretty-checkbox.min.css';
-import { setSmooth } from '../actions';
+import { setSmooth, setSongName, setSongPlaying } from '../actions';
 import { MUSIC_LIST } from '../consts';
 
 class BlockAnimation extends React.Component {
@@ -26,7 +26,9 @@ class BlockAnimation extends React.Component {
   }
 
   sketch(p) {
-    const { numBlock, song, storeSmooth } = this.props,
+    const {
+        numBlock, song, storeSmooth, storeSongName, storeSongPlaying,
+      } = this.props,
       marginRight = 210 + 20,
       marginTop = 70,
       previousH = {};
@@ -52,12 +54,13 @@ class BlockAnimation extends React.Component {
     };
 
     p.setup = () => {
-      canvas = p.createCanvas(document.body.clientWidth, p.windowHeight * 0.9, p.WEBGL);
+      canvas = p.createCanvas(document.body.clientWidth, p.windowHeight * 0.95, p.WEBGL);
       canvas.id('blockAnim');
       playButton = p.createButton('');
       playButton.class('playButton');
       playButton.addClass('paused');
       playButton.mouseClicked(() => {
+        storeSongPlaying(song.paused);
         if (song.paused) song.play();
         else song.pause();
       });
@@ -88,6 +91,7 @@ class BlockAnimation extends React.Component {
         const selected = selection.selected();
         song.songC = MUSIC_LIST.indexOf(selected);
         song.src = `/static/ml/music/${selected}.mp3`;
+        storeSongName(selected);
       });
 
       title = p.createP(`Machine Learning &</br>Game Development
@@ -168,6 +172,8 @@ BlockAnimation.propTypes = {
   smooth: PropTypes.bool.isRequired,
   song: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   storeSmooth: PropTypes.func.isRequired,
+  storeSongName: PropTypes.func.isRequired,
+  storeSongPlaying: PropTypes.func.isRequired,
 };
 
 BlockAnimation.defaultProps = {
@@ -180,6 +186,8 @@ const mapStateToProps = state => ({
   }),
   mapDispatchToProps = dispatch => ({
     storeSmooth: smooth => dispatch(setSmooth(smooth)),
+    storeSongName: songName => dispatch(setSongName(songName)),
+    storeSongPlaying: songPlaying => dispatch(setSongPlaying(songPlaying)),
   }),
   BlockSongAnimation = connect(mapStateToProps, mapDispatchToProps)(BlockAnimation);
 

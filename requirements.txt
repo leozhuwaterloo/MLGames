@@ -1,3 +1,4 @@
 django-webpack-loader
 django gunicorn psycopg2
 psycopg2-binary
+tensorflow pillow
