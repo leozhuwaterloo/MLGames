@@ -63,8 +63,7 @@ class NeutralNetwork(object):
         saver = tf.train.Saver()
         saver.restore(sess, path)
 
-        result = tf.argmax(self.y_conv, 1)
-        res = sess.run(result, feed_dict={self.x: test_img, self.keep_prob: 1.0})
+        res = sess.run(self.y_conv, feed_dict={self.x: test_img, self.keep_prob: 1.0})
         sess.close()
         return res[0]
 
@@ -74,10 +73,10 @@ def load_map(mapfile):
 
     return fish_map
 
-def predict(img_dir):
+def predict(img_data):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     fish_group = 0
-    with Image.open(img_dir) as img:
+    with Image.open(img_data) as img:
         img = resize(img)
         img = img.convert('RGB')
 
@@ -92,6 +91,40 @@ def predict(img_dir):
         max_id = fish_map["max_id"]
         min_id = fish_map["min_id"]
         nn = NeutralNetwork(max_id - min_id + 1)
-        fish_id_predict = nn.predict(os.path.join(dir_path, "Fish" + str(fish_group) + "/fish_conv.ckpt"), [final_img])
-        fish_info = fish_map.get(str(min_id + fish_id_predict), None)
-        print(fish_info)
+        predict_res = nn.predict(os.path.join(dir_path, "Fish" + str(fish_group) + "/fish_conv.ckpt"), [final_img])
+        predict_res_dict = list()
+        for i, predict_num in enumerate(predict_res):
+            predict_res_dict.append(dict(
+                fish_id=str(i),
+                predict_num=predict_num
+            ))
+
+        predict_res = sorted(predict_res_dict, reverse=True, key=lambda predict: predict['predict_num'])
+
+        final_res = dict()
+        i = 0
+        for predict in predict_res:
+            if i == 3: break
+            fish_info = fish_map.get(predict['fish_id'], None)
+            fish_info['confidence'] = predict['predict_num'];
+            if(fish_info) is not None:
+                i += 1
+                final_res[i] = fish_info
+
+        if(final_res[3]['confidence'] < 0):
+            abs_max_conf = abs(final_res[1]['confidence'])
+            abs_min_cong = abs(final_res[3]['confidence'])
+            for res in final_res:
+                final_res[res]['confidence'] += abs_min_cong + abs_max_conf
+
+
+        res_sum = final_res[1]['confidence'] + final_res[2]['confidence'] + final_res[3]['confidence']
+        for res in final_res:
+            final_res[res]['confidence'] = "{0:.4f}".format(final_res[res]['confidence'] / res_sum);
+
+        print(final_res)
+        return final_res
+
+
+if __name__ == "__main__":
+    predict("../static/ml/img/fish3.jpg")

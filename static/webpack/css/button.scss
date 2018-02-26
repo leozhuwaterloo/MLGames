@@ -1,5 +1,5 @@
 $init-color: theme-color('dark');
-$button-color: theme-color('cyan');
+$button-color: theme-color('light');
 $transfer-color: theme-color('light');
 
 .sp-btn {
@@ -36,7 +36,7 @@ $transfer-color: theme-color('light');
 }
 
 .btn-2 {
-  $color: $button-color;
+  $color: theme-color('warning');
   color: $color;
 
   &:hover {
