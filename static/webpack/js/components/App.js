@@ -11,6 +11,11 @@ import { MUSIC_LIST, ROOT_URL, FISH_IDENTIFICATION_URL } from '../consts';
 import '../../css/style.scss';
 
 class AppRounter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.autoPlayMusic = false;
+  }
+
   componentWillMount() {
     const { storeSong, storeSongName, storeSongPlaying } = this.props,
       ctx = new AudioContext(),
@@ -42,8 +47,8 @@ class AppRounter extends React.Component {
     };
 
     audio.oncanplay = () => {
-      audio.play();
-      storeSongPlaying(true);
+      if (this.autoPlayMusic) audio.play(); else audio.pause();
+      storeSongPlaying(!audio.paused);
     };
 
     storeSongName(MUSIC_LIST[0]);

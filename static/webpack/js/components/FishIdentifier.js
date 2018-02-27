@@ -7,17 +7,17 @@ import {
   GooglePlusShareButton, GooglePlusIcon,
 } from 'react-share';
 import $ from 'jquery';
-import 'bootstrap';
 import 'bootstrap/js/dist/carousel';
-import { IMAGE_URL } from '../consts';
-import { setPredict } from '../actions';
+import 'bootstrap/js/dist/modal';
+import { IMAGE_URL, TOOL_IDENTIFY_URL, TOOL_FISH_LIST_URL } from '../consts';
+import { setPredict, setFishList } from '../actions';
+import { fetchJson, getCSRFToken } from '../utils';
 
 class FishIdentifierDumb extends React.Component {
   constructor(props) {
     super(props);
     this.test = 1;
     this.predict = this.predict.bind(this);
-    this.ownPredict = this.ownPredict.bind(this);
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
     this.imageInput = document.createElement('input');
@@ -25,6 +25,9 @@ class FishIdentifierDumb extends React.Component {
     this.reader = new FileReader();
     this.uploadedImage = null;
     this.prevIsUpload = false;
+    this.imageInput.onchange = (e) => {
+      this.reader.readAsDataURL(e.path[0].files[0]);
+    };
     this.reader.onloadend = () => {
       if (this.uploadedImage == null) this.uploadedImage = new Image();
       this.uploadedImage.src = this.reader.result;
@@ -34,20 +37,10 @@ class FishIdentifierDumb extends React.Component {
         this.predict();
       };
     };
-    this.imageInput.onchange = (e) => {
-      this.reader.readAsDataURL(e.path[0].files[0]);
-    };
-
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i += 1) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, 10) === ('csrftoken=')) {
-          this.csrftoken = decodeURIComponent(cookie.substring(10));
-          break;
-        }
-      }
-    }
+    this.csrftoken = getCSRFToken();
+    fetchJson(TOOL_FISH_LIST_URL, this.csrftoken, (res) => {
+      props.storeFishList(res);
+    });
   }
 
   componentDidMount() {
@@ -63,39 +56,27 @@ class FishIdentifierDumb extends React.Component {
   predict() {
     const { storePredict } = this.props,
       img = this.targetImg,
-      imgRatio = img.width / img.height,
-      xmlHttp = new XMLHttpRequest(),
-      formData = new FormData();
-
-    xmlHttp.onreadystatechange = () => {
-      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        const result = JSON.parse(xmlHttp.responseText);
-        if (result && result.result) {
-          storePredict(result.result);
-          if (this.prevIsUpload) {
-            this.carousel.carousel(4);
-            this.prevIsUpload = false;
-          }
-        }
-      }
-    };
+      imgRatio = img.width / img.height;
 
     this.canvas.width = Math.max(96, 64 * imgRatio);
     this.canvas.height = Math.max(64, 96 / imgRatio);
     this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-    formData.append('img', this.canvas.toDataURL());
-    xmlHttp.open('POST', 'http://159.89.116.228/tool/ml/identify/', true);
-    xmlHttp.setRequestHeader('X-CSRFToken', this.csrftoken);
-    xmlHttp.send(formData);
-  }
 
-  ownPredict() {
-    this.imageInput.click();
+    fetchJson(TOOL_IDENTIFY_URL, this.csrftoken, (res) => {
+      storePredict(res.result);
+      if (this.prevIsUpload) {
+        this.carousel.carousel(4);
+        this.prevIsUpload = false;
+      }
+    }, { img: this.canvas.toDataURL() });
   }
 
   render() {
-    const { predict } = this.props;
-    let uploadedImageDiv = null;
+    const { predict, fishList } = this.props,
+      fishListDiv = [],
+      fishPredictDiv = [];
+    let uploadedImageDiv = null,
+      i = 0;
 
     if (this.uploadedImage) {
       uploadedImageDiv = (
@@ -105,6 +86,47 @@ class FishIdentifierDumb extends React.Component {
           </div>
         </div>
       );
+    }
+
+    if (fishList) {
+      Object.keys(fishList).forEach((fishId) => {
+        if (fishList[fishId].genusname) {
+          i += 1;
+          fishListDiv.push( // eslint-disable-line function-paren-newline
+            <a
+              key={fishId}
+              target="_blank"
+              href={`https://www.google.ca/search?q=${fishList[fishId].genusname}+${fishList[fishId].speciesname}`}
+            >
+              {i}: {fishList[fishId].genusname} {fishList[fishId].speciesname}
+            </a>);
+        }
+      });
+    }
+
+    for (i = 1; i < 4; i += 1) {
+      fishPredictDiv.push( // eslint-disable-line function-paren-newline
+        <div className="alert alert-light" key={i}>
+          <a
+            target="_blank"
+            href={`https://www.google.ca/search?q=${predict[i].genusname}+${predict[i].speciesname}`}
+          >
+            {predict[i].genusname} {predict[i].speciesname}
+          </a>
+          <span className="progress-num">
+            {predict[i].confidence === 0 ? '' : `${predict[i].confidence}%`}
+          </span>
+          <div className="progress">
+            <div
+              className="progress-bar progress-bar-striped"
+              role="progressbar"
+              style={{ width: `${predict[i].confidence}%` }}
+              aria-valuenow={predict[i].confidence}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            />
+          </div>
+        </div>);
     }
 
     return (
@@ -182,64 +204,50 @@ class FishIdentifierDumb extends React.Component {
           <div>
             <div className="center-display">
               <button className="sp-btn btn-2 center-display predict-button" onClick={this.predict}>Predict</button>
-              <button className="sp-btn btn-2 center-display try-button" onClick={this.ownPredict}>
+              <button className="sp-btn btn-2 center-display try-button" onClick={() => this.imageInput.click()}>
                 Try With Your Own Image
               </button>
             </div>
             <div className="center-display predict-results">
-              <div className="alert alert-light">
-                {predict[1].genusname} {predict[1].speciesname}
-                <span className="progress-num">
-                  {predict[1].confidence === 0 ? '' : `${predict[1].confidence}%`}
-                </span>
-                <div className="progress">
-                  <div
-                    className="progress-bar progress-bar-striped"
-                    role="progressbar"
-                    style={{ width: `${predict[1].confidence}%` }}
-                    aria-valuenow={predict[1].confidence}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  />
-                </div>
-              </div>
-              <div className="alert alert-light">
-                {predict[2].genusname} {predict[2].speciesname}
-                <span className="progress-num">
-                  {predict[2].confidence === 0 ? '' : `${predict[2].confidence}%`}
-                </span>
-                <div className="progress">
-                  <div
-                    className="progress-bar progress-bar-striped"
-                    role="progressbar"
-                    style={{ width: `${predict[2].confidence}%` }}
-                    aria-valuenow={predict[2].confidence}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  />
-                </div>
-              </div>
-              <div className="alert alert-light">
-                {predict[3].genusname} {predict[3].speciesname}
-                <span className="progress-num">
-                  {predict[3].confidence === 0 ? '' : `${predict[3].confidence}%`}
-                </span>
-                <div className="progress">
-                  <div
-                    className="progress-bar progress-bar-striped"
-                    role="progressbar"
-                    style={{ width: `${predict[3].confidence}%` }}
-                    aria-valuenow={predict[3].confidence}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  />
-                </div>
-              </div>
+              {fishPredictDiv}
             </div>
           </div>
         </div>
         <div className="contend-end center-display">
           Proudly Made by Leo Zhu
+          <button
+            className="sp-btn btn-4 center-display fish-list-button"
+            data-toggle="modal"
+            data-target=".bd-example-modal-lg"
+          >
+            FishList
+          </button>
+          <div
+            className="modal fade bd-example-modal-lg"
+            role="dialog"
+            aria-labelledby="myLargeModalLabel"
+            aria-hidden="true"
+          >
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Fish List</h5>
+                  <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <p>
+                    I am sorry but I can only recognize the following fishes:
+                  </p>
+                  {fishListDiv}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -248,15 +256,19 @@ class FishIdentifierDumb extends React.Component {
 
 FishIdentifierDumb.propTypes = {
   predict: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  fishList: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   storePredict: PropTypes.func.isRequired,
+  storeFishList: PropTypes.func.isRequired,
 };
 
 
 const mapStateToProps = state => ({
     predict: state.fishIdentifier.predict,
+    fishList: state.fishIdentifier.fishList,
   }),
   mapDispatchToProps = dispatch => ({
     storePredict: predict => dispatch(setPredict(predict)),
+    storeFishList: fishList => dispatch(setFishList(fishList)),
   }),
   FishIdentifier = connect(mapStateToProps, mapDispatchToProps)(FishIdentifierDumb);
 

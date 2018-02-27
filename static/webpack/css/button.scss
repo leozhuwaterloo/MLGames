@@ -1,9 +1,9 @@
-$init-color: theme-color('dark');
-$button-color: theme-color('light');
-$transfer-color: theme-color('light');
+$dark: theme-color('dark');
+$cyan: theme-color('cyan');
+$light: theme-color('light');
 
 .sp-btn {
-  background: $init-color;
+  background: $dark;
   border: 4px solid;
   font-weight: bold;
   letter-spacing: inherit;
@@ -19,13 +19,13 @@ $transfer-color: theme-color('light');
 }
 
 .btn-1 {
-  $color: $button-color;
+  $color: $light;
   color: $color;
   &:hover {
     animation: halftone 1s forwards;
     background: radial-gradient(circle, $color 0.2em, transparent 0.25em) 0 0 / 1.25em 1.25em
               , radial-gradient(circle, $color 0.2em, transparent 0.25em) 6.25em 6.25em / 1.25em 1.25em;
-    color: $init-color;
+    color: $dark;
   }
 }
 
@@ -42,7 +42,7 @@ $transfer-color: theme-color('light');
   &:hover {
     animation: stripes-move 0.75s infinite linear;
     background: repeating-linear-gradient(45deg, $color 0, $color 0.25em, transparent 0.25em, transparent .5em);
-    color: $transfer-color;
+    color: $light;
   }
 }
 
@@ -53,14 +53,15 @@ $transfer-color: theme-color('light');
 }
 
 .btn-3 {
-  $color: $button-color;
+  $color: $cyan;
   color: $color;
-
+  transition: border-color color 1s;
   &:hover {
     animation: sawtooth 0.35s infinite linear;
     background: linear-gradient(45deg, $color 0.5em, transparent 0.5em) 0 0 / 1em 1em
               , linear-gradient(-45deg, $color 0.5em, transparent 0.5em) 0 0 / 1em 1em;
-    color: $transfer-color;
+    color: $dark;
+    border-color: $dark;
   }
 }
 
@@ -71,9 +72,9 @@ $transfer-color: theme-color('light');
 }
 
 .btn-4 {
-  $color: $button-color;
+  $color: $cyan;
   color: $color;
-
+  transition: color border-color 1s;
   &:hover {
     animation: zigzag 1s linear infinite;
     background: linear-gradient(135deg, rgba($color,0.6) 0.25em, transparent 0.25em) -0.5em 0
@@ -81,7 +82,8 @@ $transfer-color: theme-color('light');
               , linear-gradient(315deg, rgba($color,0.6) 0.25em, transparent 0.25em) 0 0
               , linear-gradient(45deg, rgba($color,0.6) 0.25em, transparent 0.25em) 0 0;
     background-size: 0.75em 0.75em;
-    color: $transfer-color;
+    color: $light;
+    border-color: $dark;
   }
 }
 
@@ -92,14 +94,14 @@ $transfer-color: theme-color('light');
 }
 
 .btn-5 {
-  $color: $button-color;
+  $color: $cyan;
   color: $color;
 
   &:hover {
     animation: pulse 1s ease-in infinite;
     background: radial-gradient(circle, rgba($color,0.5) 43%, transparent 50%) 0 0 / 1em 1em
               , radial-gradient(circle, rgba($color,0.5) 43%, transparent 50%) 0.5em 0.5em / 2em 2em;
-    color: $init-color
+    color: $dark
   }
 }
 

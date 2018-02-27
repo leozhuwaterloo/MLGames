@@ -104,11 +104,11 @@ def predict(img_data):
         i = 0
         for predict in predict_res:
             if i == 3: break
-            fish_info = fish_map.get(predict['fish_id'], None)
-            fish_info['confidence'] = predict['predict_num'];
-            if(fish_info) is not None:
+            if predict['fish_id'] in fish_map:
                 i += 1
-                final_res[i] = fish_info
+                final_res[i] = fish_map.get(predict['fish_id'])
+                final_res[i]['confidence'] = predict['predict_num'];
+
 
         if(final_res[3]['confidence'] < 0):
             abs_max_conf = abs(final_res[1]['confidence'])

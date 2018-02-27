@@ -12,17 +12,7 @@ body {
 nav {
   height : #{$nav-height}px;
   overflow-y: visible;
-
-  &:after {
-    $color: theme-color('secondary');
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 100%;
-    margin-top: #{$nav-height/2}px;
-    height: 5px;
-    background: linear-gradient(to bottom, $color, rgba($color,0));
-  }
+  border-bottom: 2px solid theme-color('secondary');
 }
 
 .navbar-collapse.collapsing, .navbar-collapse.show{

@@ -1,4 +1,4 @@
-import { SET_PREDICT } from '../actions';
+import { SET_PREDICT, SET_FISH_LIST } from '../actions';
 
 const initialState = {
   predict: {
@@ -18,6 +18,7 @@ const initialState = {
       confidence: 0,
     },
   },
+  fishList: {},
 };
 
 export default function fishIdentifier(state = initialState, action) {
@@ -25,6 +26,10 @@ export default function fishIdentifier(state = initialState, action) {
     case SET_PREDICT:
       return Object.assign({}, state, {
         predict: action.predict,
+      });
+    case SET_FISH_LIST:
+      return Object.assign({}, state, {
+        fishList: action.fishList,
       });
     default:
       return state;

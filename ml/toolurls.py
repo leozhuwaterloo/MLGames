@@ -1,6 +1,7 @@
-from django.conf.urls import url
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    url(r'^/identify/$', views.identify, name="identify"),
+    path('/identify', views.identify, name="identify"),
+    path('/fishes', views.fishes, name="fishes"),
 ]
