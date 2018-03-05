@@ -5,9 +5,15 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import MyNavbar from './MyNavbar';
 import BlockAnimation from './BlockAnimation';
-import FishIdentifier from './FishIdentifier';
+import FishIdentification from './FishIdentification';
+import TerrainGeneration from './TerrainGeneration';
+import SmartRocket from './SmartRocket';
+import PhotoMosaic from './PhotoMosaic';
 import { setSong, setSongName, setSongPlaying } from '../actions';
-import { MUSIC_LIST, ROOT_URL, FISH_IDENTIFICATION_URL } from '../consts';
+import {
+  MUSIC_LIST, ROOT_URL, FISH_IDENTIFICATION_URL, TERRAIN_GENERATION_URL,
+  SMART_ROCKET_URL, PHOTO_MOSAIC_URL,
+} from '../consts';
 import '../../css/style.scss';
 
 class AppRounter extends React.Component {
@@ -37,6 +43,7 @@ class AppRounter extends React.Component {
         total += Math.abs(input[i]);
       }
       audio.amp = Math.sqrt(total / len);
+      audio.channel = input;
     };
 
     audio.onended = () => {
@@ -61,7 +68,10 @@ class AppRounter extends React.Component {
         <div>
           <MyNavbar />
           <Route exact path={ROOT_URL} component={BlockAnimation} />
-          <Route path={FISH_IDENTIFICATION_URL} component={FishIdentifier} />
+          <Route path={FISH_IDENTIFICATION_URL} component={FishIdentification} />
+          <Route path={TERRAIN_GENERATION_URL} component={TerrainGeneration} />
+          <Route path={SMART_ROCKET_URL} component={SmartRocket} />
+          <Route path={PHOTO_MOSAIC_URL} component={PhotoMosaic} />
         </div>
       </BrowserRouter>
     );

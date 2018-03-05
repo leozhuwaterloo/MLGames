@@ -1,2 +1,2 @@
 export * from './BlockAnimation';
-export * from './FishIdentifier';
+export * from './FishIdentification';

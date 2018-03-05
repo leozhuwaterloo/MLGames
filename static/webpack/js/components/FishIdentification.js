@@ -13,7 +13,7 @@ import { IMAGE_URL, TOOL_IDENTIFY_URL, TOOL_FISH_LIST_URL } from '../consts';
 import { setPredict, setFishList } from '../actions';
 import { fetchJson, getCSRFToken } from '../utils';
 
-class FishIdentifierDumb extends React.Component {
+class FishIdentificationDumb extends React.Component {
   constructor(props) {
     super(props);
     this.test = 1;
@@ -130,7 +130,7 @@ class FishIdentifierDumb extends React.Component {
     }
 
     return (
-      <div className="container-fluid main-container">
+      <div className="container-fluid main-container full-screen">
         <div className="content-start center-display">
           <div className="share-buttons">
             <FacebookShareButton
@@ -254,7 +254,7 @@ class FishIdentifierDumb extends React.Component {
   }
 }
 
-FishIdentifierDumb.propTypes = {
+FishIdentificationDumb.propTypes = {
   predict: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   fishList: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   storePredict: PropTypes.func.isRequired,
@@ -263,14 +263,14 @@ FishIdentifierDumb.propTypes = {
 
 
 const mapStateToProps = state => ({
-    predict: state.fishIdentifier.predict,
-    fishList: state.fishIdentifier.fishList,
+    predict: state.fishIdentification.predict,
+    fishList: state.fishIdentification.fishList,
   }),
   mapDispatchToProps = dispatch => ({
     storePredict: predict => dispatch(setPredict(predict)),
     storeFishList: fishList => dispatch(setFishList(fishList)),
   }),
-  FishIdentifier = connect(mapStateToProps, mapDispatchToProps)(FishIdentifierDumb);
+  FishIdentification = connect(mapStateToProps, mapDispatchToProps)(FishIdentificationDumb);
 
 
-export default FishIdentifier;
+export default FishIdentification;

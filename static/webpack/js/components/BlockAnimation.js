@@ -6,7 +6,7 @@ import 'p5/lib/addons/p5.sound';
 import 'p5/lib/addons/p5.dom';
 import 'pretty-checkbox/dist/pretty-checkbox.min.css';
 import { setSmooth, setSongName, setSongPlaying } from '../actions';
-import { MUSIC_LIST } from '../consts';
+import { MUSIC_LIST, DARK_COLOR } from '../consts';
 
 class BlockAnimationDumb extends React.Component {
   constructor(props) {
@@ -31,15 +31,16 @@ class BlockAnimationDumb extends React.Component {
       } = this.props,
       marginRight = 210 + 20,
       marginTop = 70,
-      previousH = {};
+      previousH = {},
+      masterParent = document.getElementById('block-animation');
     let { smooth } = this.props,
       angle = 0,
       sliderDragged = false,
       sliderReleased = true,
-      canvas, x, z, ma, w, maxD, length, d, offset, a, h, pH,
+      x, z, ma, w, maxD, length, d, offset, a, h, pH,
       playButton, smoothCB, slider, selection, title;
 
-    p.setWindow = () => {
+    function setWindow() {
       length = p.floor(p.min(p.width, p.height));
       maxD = p.dist(0, 0, length * 0.8, length * 0.8);
       w = p.floor(length / numBlock);
@@ -51,12 +52,15 @@ class BlockAnimationDumb extends React.Component {
         (p.width - title.elt.clientWidth) / 2,
         (p.height - title.elt.clientHeight - 200) / 2,
       );
-    };
+    }
 
     p.setup = () => {
-      canvas = p.createCanvas(document.body.clientWidth, p.windowHeight * 0.95, p.WEBGL);
+      p.frameRate(60);
+      const canvas = p.createCanvas(document.body.clientWidth, p.windowHeight * 0.95, p.WEBGL);
+      canvas.parent(masterParent);
       canvas.id('blockAnim');
       playButton = p.createButton('');
+      playButton.parent(masterParent);
       playButton.class('playButton');
       playButton.addClass('paused');
       playButton.mouseClicked(() => {
@@ -66,12 +70,14 @@ class BlockAnimationDumb extends React.Component {
       });
 
       smoothCB = p.createCheckbox();
+      smoothCB.parent(masterParent);
       smoothCB.class('smoothCB pretty p-default');
       smoothCB.html("<div class='state'><label>Smooth</label></div>", true);
       smoothCB.checked(smooth);
       smoothCB.mouseClicked(() => { smooth = smoothCB.checked(); storeSmooth(smooth); });
 
       slider = p.createSlider(0, song.duration);
+      slider.parent(masterParent);
       slider.class('slider');
       slider.changed(() => {
         song.currentTime = slider.value();
@@ -83,6 +89,7 @@ class BlockAnimationDumb extends React.Component {
       });
 
       selection = p.createSelect();
+      selection.parent(masterParent);
       selection.class('form-control form-control-sm selectBox');
       MUSIC_LIST.forEach((music) => {
         selection.option(music);
@@ -96,14 +103,15 @@ class BlockAnimationDumb extends React.Component {
 
       title = p.createP(`Machine Learning &</br>Game Development
         </br>Prepare to be Amazed!`).center();
+      title.parent(masterParent);
       title.class('display-3 title');
 
       ma = p.atan(1 / p.sqrt(2));
-      p.setWindow();
+      setWindow();
     };
 
     p.draw = () => {
-      p.background('#343a40');
+      p.background(DARK_COLOR);
       p.ortho(-p.width, p.width, p.height, -p.height, 0, p.width * 3);
       p.rotateX(ma);
       p.rotateY(-p.QUARTER_PI);
@@ -158,12 +166,12 @@ class BlockAnimationDumb extends React.Component {
 
     p.windowResized = () => {
       p.resizeCanvas(document.body.clientWidth, p.windowHeight * 0.9);
-      p.setWindow();
+      setWindow();
     };
   }
 
   render() {
-    return <div />;
+    return <div id="block-animation" />;
   }
 }
 

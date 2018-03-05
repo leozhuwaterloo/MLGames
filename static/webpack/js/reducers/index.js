@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
 import blockAnimation from './BlockAnimation';
-import fishIdentifier from './FishIdentifier';
+import fishIdentification from './FishIdentification';
 
 export default combineReducers({
   blockAnimation,
-  fishIdentifier,
+  fishIdentification,
 });

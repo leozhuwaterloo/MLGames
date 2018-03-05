@@ -12,7 +12,20 @@ body {
 nav {
   height : #{$nav-height}px;
   overflow-y: visible;
-  border-bottom: 2px solid theme-color('secondary');
+  border-bottom: theme-color('secondary') solid 2px;
+}
+
+.navbar-nav div:hover > div.dropdown-menu {
+    display: block;
+}
+.dropdown-submenu {
+    position:relative;
+
+    &>.dropdown-menu {
+        top:0;
+        left:100%;
+        margin-top:-6px;
+    }
 }
 
 .navbar-collapse.collapsing, .navbar-collapse.show{
@@ -29,6 +42,14 @@ nav {
   align-items: center;
 }
 
+.theme-dark{
+  background-color: theme-color('dark');
+}
+
+.full-screen {
+  width: 100vw;
+  height: calc(100vh - #{$nav-height}px);
+}
 
 .fill-container {
   width: 100%;

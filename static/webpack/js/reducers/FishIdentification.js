@@ -21,7 +21,7 @@ const initialState = {
   fishList: {},
 };
 
-export default function fishIdentifier(state = initialState, action) {
+export default function fishIdentification(state = initialState, action) {
   switch (action.type) {
     case SET_PREDICT:
       return Object.assign({}, state, {

@@ -1,7 +1,6 @@
 .main-container {
-  width: 100vw;
-  height: calc(100vh - #{$nav-height}px);
   background: theme-color('dark');
+  overflow: hidden;
   & .content-start, .contend-end{
     width:  100%;
     height: 10%;

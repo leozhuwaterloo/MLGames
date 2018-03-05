@@ -4,7 +4,10 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import 'bootstrap/js/dist/collapse';
 import 'bootstrap/js/dist/dropdown';
-import { ROOT_URL, FISH_IDENTIFICATION_URL } from '../consts';
+import {
+  ROOT_URL, FISH_IDENTIFICATION_URL, TERRAIN_GENERATION_URL, SMART_ROCKET_URL,
+  PHOTO_MOSAIC_URL,
+} from '../consts';
 import { setSongPlaying } from '../actions';
 
 const MyNavbarDumb = ({
@@ -41,9 +44,29 @@ const MyNavbarDumb = ({
             Projects
             </a>
             <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-              <Link className="dropdown-item" to={FISH_IDENTIFICATION_URL}>
-                Fish Identification
-              </Link>
+              <div className="dropdown-submenu">
+                <div className="dropdown-item">Machine Learning</div>
+                <div className="dropdown-menu">
+                  <a className="dropdown-item" href="http://leozhu.org/pages/mnist-detail/">Handwritten Digit</a>
+                  <Link className="dropdown-item" to={SMART_ROCKET_URL}>
+                    Smart Rocket
+                  </Link>
+                  <Link className="dropdown-item" to={FISH_IDENTIFICATION_URL}>
+                    Fish Identification
+                  </Link>
+                </div>
+              </div>
+              <div className="dropdown-submenu">
+                <div className="dropdown-item">Algorithum</div>
+                <div className="dropdown-menu">
+                  <Link className="dropdown-item" to={TERRAIN_GENERATION_URL}>
+                    Terrain Generation
+                  </Link>
+                  <Link className="dropdown-item" to={PHOTO_MOSAIC_URL}>
+                    Photo Mosaic
+                  </Link>
+                </div>
+              </div>
             </div>
           </li>
         </ul>
